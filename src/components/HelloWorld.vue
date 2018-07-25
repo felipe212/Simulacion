@@ -33,6 +33,15 @@
             <div class="text-danger" v-if="!$v.configPolicyA.amountToOrder.minValue">Debe ingresar un valor mayor o igual a 1</div>
           </b-col>
         </b-row>
+        <b-row v-if="configPolicyA.orderFirstDay  " class="mb-2">
+          <b-col sm="7" class="text-left"><label for="input-small">Cantidad Pedida Primer Dia:</label></b-col>
+          <b-col sm="3">
+            <b-form-input id="input-small" v-model.number="configPolicyA.amountOrderFirstDay" size="sm" type="number"></b-form-input>
+            <div class="text-danger" v-if="!$v.configPolicyA.amountOrderFirstDay.required">Debe ingresar un valor</div>
+            <div class="text-danger" v-if="!$v.configPolicyA.amountOrderFirstDay.maxValue">Debe ingresar un valor menor o igual a 100</div>
+            <div class="text-danger" v-if="!$v.configPolicyA.amountOrderFirstDay.minValue">Debe ingresar un valor mayor o igual a 1</div>
+          </b-col>
+        </b-row>
         <b-row class="mb-2">
           <b-col sm="7" class="text-left"><label for="input-small">El pedido se realiza cada (dias):</label></b-col>
           <b-col sm="3">
@@ -48,7 +57,7 @@
             <b-form-input id="input-small" v-model.number="configPolicyA.km" size="sm"></b-form-input>
             <div class="text-danger" v-if="!$v.configPolicyA.km.required">Debe ingresar un valor</div>
             <div class="text-danger" v-if="!$v.configPolicyA.km.maxValue">Debe ingresar un valor menor o igual a 100</div>
-            <div class="text-danger" v-if="!$v.configPolicyA.km.minValue">Debe ingresar un valor mayor o igual a 0.00001</div>
+            <div class="text-danger" v-if="!$v.configPolicyA.km.minValue">Debe ingresar un valor mayor o igual a 0.01</div>
             <div class="text-danger" v-if="!$v.configPolicyA.km.maxLength">Debe ingresar menos digitos</div>
           </b-col>
         </b-row>
@@ -58,7 +67,7 @@
             <b-form-input id="input-small" v-model.number="configPolicyA.ks" size="sm"></b-form-input>
             <div class="text-danger" v-if="!$v.configPolicyA.ks.required">Debe ingresar un valor</div>
             <div class="text-danger" v-if="!$v.configPolicyA.ks.maxValue">Debe ingresar un valor menor o igual a 100</div>
-            <div class="text-danger" v-if="!$v.configPolicyA.ks.minValue">Debe ingresar un valor mayor o igual a 0.00001</div>
+            <div class="text-danger" v-if="!$v.configPolicyA.ks.minValue">Debe ingresar un valor mayor o igual a 0.01</div>
             <div class="text-danger" v-if="!$v.configPolicyA.ks.maxLength">Debe ingresar menos digitos</div>
           </b-col>
         </b-row>
@@ -146,6 +155,11 @@ export default {
           type: 'boolean',
         },
         {
+          label: 'Pedido 1er dia',
+          field: 'orderFirstDay',
+          type: 'boolean',
+        },
+        {
           label: 'RND',
           field: 'rndArrive',
           type: 'number',
@@ -194,6 +208,7 @@ export default {
         demand: '-',
         stock: 20,
         order: 'Si',
+        orderFirstDay: 'Si',
         rndArrive: 0, 
         delayArrive: '-',
         arrive: '-',
@@ -215,6 +230,13 @@ export default {
         integer
       },
       amountToOrder: {
+        required,
+        maxValue: maxValue(100),
+        minValue: minValue(1),
+        numeric,
+        integer
+      },
+      amountOrderFirstDay: {
         required,
         maxValue: maxValue(100),
         minValue: minValue(1),
@@ -258,25 +280,34 @@ export default {
   },
   methods: {
     simulatePolicyA () {
-      this.hasBeenSimulated = true
+      if (!this.configPolicyA.orderFirstDay) {
+        this.week.orderFirstDay = 'No'
+      }
       this.$v.$touch()
       if (this.$v.$invalid) {
         alert('Uno de los campos no contiene los valores o valores correctos')
       } else {
+      this.hasBeenSimulated = true
       this.rows = []
       this.currentWeek = 1
       this.rows.push({ iteration: 0, rndDemand:'-', demand: '-', stock: this.week.stock, order: '-', rndArrive: 0, delayArrive: '-', arrive: '-', ko: 0, km: 0, ks: 0, totalCost: 0, totalCostAcum: 0})
       while (this.currentWeek <= this.configPolicyA.daysToSimulate) {
         let weekToPush = Object.assign({}, this.week)
         if (weekToPush.arrive === this.currentWeek) {
+          if (weekToPush.orderFirstDay === 'No'){
           weekToPush.stock += this.configPolicyA.amountToOrder
           weekToPush.arrive = '-'
+          } else {
+            weekToPush.orderFirstDay = "No"
+            weekToPush.stock += this.configPolicyA.amountOrderFirstDay
+            weekToPush.arrive = '-'
+          }
         }
         weekToPush.iteration = this.currentWeek
         weekToPush.rndDemand = this.generateRandomDemand()
         weekToPush.demand = this.getDemand(weekToPush.rndDemand)
         weekToPush.stock = this.sale(weekToPush.stock, weekToPush.demand)
-        if((weekToPush.iteration % this.configPolicyA.daysToOrder) == 0 ) {
+        if(((weekToPush.iteration % this.configPolicyA.daysToOrder) == 0) || (this.currentWeek === 1 && this.configPolicyA.orderFirstDay)) {
           weekToPush.order = 'Si'
         } else {
           weekToPush.order = 'No'
@@ -284,8 +315,9 @@ export default {
           weekToPush.delayArrive = '-'
           weekToPush.ko = 0
         }
-        if (weekToPush.order === 'Si' || (this.currentWeek === 1 && this.configPolicyA.orderFirstDay)) {
-          weekToPush.order = 'Si'
+        // if (weekToPush.order === 'Si' || (this.currentWeek === 1 && this.configPolicyA.orderFirstDay)) {
+        if (weekToPush.order === 'Si') {
+          // weekToPush.order = 'Si'
           weekToPush.rndArrive = this.generateRandomArrive()
           weekToPush.delayArrive = this.getDelayArrive(weekToPush.rndArrive)
           weekToPush.arrive = this.currentWeek + weekToPush.delayArrive
