@@ -1,6 +1,53 @@
 <template>
   <div class="mx-2">
     <b-row>
+      <b-col class="px-4" cols="6">
+        <b-row class="mb-2">
+          <b-col sm="12" class="text-center"><h4>Configurar politica B</h4></b-col>
+        </b-row>
+        <b-row class="mb-2">
+          <b-col sm="7" class="text-left"><label for="input-small">Cantidad de dias a simular:</label></b-col>
+          <b-col sm="3">
+            <b-form-input id="input-small" v-model.number="configPolicyB.daysToSimulate" size="sm" type="number"></b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="mb-2">
+          <b-col sm="7" class="text-left"><label for="input-small">Stock inicial:</label></b-col>
+          <b-col sm="3">
+            <b-form-input id="input-small" v-model.number="configPolicyB.initialStock" size="sm" type="number"></b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="mb-2">
+          <b-col sm="7" class="text-left"><label for="input-small">Cantidad Pedida:</label></b-col>
+          <b-col sm="3">
+            <b-form-input id="input-small" disabled v-model.number="configPolicyB.amountToOrder" size="sm" type="text"></b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="mb-2">
+          <b-col sm="7" class="text-left"><label for="input-small">El pedido se realiza cada (dias):</label></b-col>
+          <b-col sm="3">
+            <b-form-input id="input-small" v-model.number="configPolicyB.daysToOrder" size="sm" type="number"></b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="mb-2">
+          <b-col sm="7" class="text-left"><label for="input-small">Costo Almacenamiento por Unidad:</label></b-col>
+          <b-col sm="3">
+            <b-form-input id="input-small" v-model.number="configPolicyB.km" size="sm" type="number"></b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="mb-2">
+          <b-col sm="7" class="text-left"><label for="input-small">Costo de stock-out por Unidad:</label></b-col>
+          <b-col sm="3">
+            <b-form-input id="input-small" v-model.number="configPolicyB.ks" size="sm" type="number"></b-form-input>
+          </b-col>
+        </b-row>
+        <b-form-group label="Realiza pedido el primer dia?">
+          <b-form-radio-group v-model="configPolicyB.orderFirstDay" :options="optionsFirstDayB" name="radio">
+          </b-form-radio-group>
+        </b-form-group>
+      </b-col>
+    </b-row>
+    <b-row>
       <b-col cols="3" class="text-left mb-3">
         <b-button @click="simulatePolicyB">Simular B</b-button>
       </b-col>
@@ -10,13 +57,29 @@
 </template>
 
 <script>
+
 export default {
   name: 'my-component',
-  props: {
-    policy: Object
-  },
   data () {
     return {
+
+      orderFirstDayB: true,
+      optionsFirstDayB: [
+        { text: 'Si', value: true },
+        { text: 'No', value: false }
+      ],
+
+      configPolicyB: {
+        daysToSimulate: 300,
+        initialStock: 20,
+        amountToOrder: 'Acumulado',
+        daysToOrder: 20,
+        km: 5,
+        ks: 9,
+        orderFirstDay: true,
+        amountOrderFirstDay: 25
+      },
+
       policyB: {
         amount: 25,
         period: 20
@@ -127,7 +190,7 @@ export default {
       week: {
         iteration: 0,
         rndDemand: null, 
-        demand: '-',
+        demand: 0,
         acumDemand: 0,
         stock: 20,
         order: 'Si',
@@ -148,7 +211,7 @@ export default {
       this.rows = []
       this.currentWeek = 1
       this.rows.push({ iteration: 0, rndDemand:'-', demand: '-', acumDemand: 0, stock: 20, order: '-', rndArrive: 0, delayArrive: '-', arrive: '-', amountBuyed: 0, ko: 0, km: 0, ks: 0, totalCost: 0, totalCostAcum: 0})
-      while (this.currentWeek <= 300) {
+      while (this.currentWeek <= this.configPolicyB.daysToSimulate) {
         let weekToPush = Object.assign({}, this.week)
         if (weekToPush.arrive === this.currentWeek) {
           weekToPush.stock += weekToPush.amountBuyed
@@ -160,7 +223,7 @@ export default {
         weekToPush.demand = this.getDemand(weekToPush.rndDemand)
         weekToPush.acumDemand += weekToPush.demand
         weekToPush.stock = this.sale(weekToPush.stock, weekToPush.demand)
-        if((weekToPush.iteration % 20) == 0 ) {
+        if((weekToPush.iteration % this.configPolicyB.daysToOrder) == 0 ) {
           weekToPush.order = 'Si'
         } else {
           weekToPush.order = 'No'
@@ -168,7 +231,8 @@ export default {
           weekToPush.delayArrive = '-'
           weekToPush.ko = 0
         }
-        if (weekToPush.order === 'Si' || this.currentWeek === 1) {
+        if (weekToPush.order === 'Si' || (this.currentWeek === 1 && this.configPolicyB.orderFirstDay)) {
+          weekToPush.order = 'Si'
           weekToPush.rndArrive = this.generateRandomArrive()
           weekToPush.delayArrive = this.getDelayArrive(weekToPush.rndArrive)
           weekToPush.arrive = this.currentWeek + weekToPush.delayArrive
@@ -185,8 +249,8 @@ export default {
           let selectedAmount = this.KOCost.find(cost => cost.amount >= weekToPush.amountBuyed)
           weekToPush.ko = weekToPush.amountBuyed * selectedAmount.cost
         }
-        weekToPush.km = weekToPush.stock * 5
-        weekToPush.ks = this.missingAmount * 9 * -1
+        weekToPush.km = weekToPush.stock * this.configPolicyB.km
+        weekToPush.ks = this.missingAmount * this.configPolicyB.ks * -1
         weekToPush.totalCost = weekToPush.ko + weekToPush.km + weekToPush.ks
         weekToPush.totalCostAcum += weekToPush.totalCost
         this.rows.push(weekToPush)

@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <input type="button" class="btn btn-info" value="Volver a Simular" onClick="window.location.href=window.location.href">
     <!-- <b-row>
       
       <b-col class="px-4" cols="6">
@@ -52,7 +53,7 @@
     <HelloWorld @clicked="toggleA" msg="Welcome to Your Vue.js App"/>
     <hr>
     <h2 class="mt-5">Politica B</h2>
-    <Policyb @clicked="toggleB" :policy="configPolicyB" />
+    <Policyb @clicked="toggleB"/>
     <b-modal title="Politica Ganadora" id="winnerModal" ref="winnerModal">
       La Politica Ganadora es la politica {{winner}} por una diferencia de {{diff}}
     </b-modal>
@@ -67,22 +68,6 @@ export default {
   name: 'app',
   data () {
     return {
-
-      orderFirstDayB: true,
-      optionsFirstDayB: [
-        { text: 'Si', value: true },
-        { text: 'No', value: false }
-      ],
-      configPolicyB: {
-        daysToSimulate: 300,
-        initialStock: 20,
-        amountToOrder: 'Aleatorio',
-        daysToOrder: 20,
-        km: 5,
-        ks: 9,
-        orderFirstDay: true,
-        amountOrderFirstDay: 25
-      },
       amountA: 0,
       amountB: 0,
       clickedA: false,
