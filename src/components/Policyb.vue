@@ -80,7 +80,7 @@
         <b-button class="btn btn-success" :disabled="hasBeenSimulated" @click="simulatePolicyB">Simular B</b-button>
       </b-col>
     </b-row>
-    <vue-good-table styleClass="vgt-table condensed" theme="black-rhino" :columns="columns" :rows="rows"/>
+    <vue-good-table :pagination-options="{enabled: true, mode: 'pages'}" styleClass="vgt-table condensed" theme="black-rhino" :columns="columns" :rows="rows"/>
   </div>
 </template>
 
@@ -169,11 +169,11 @@ export default {
           field: 'order',
           type: 'boolean',
         },
-        {
-          label: 'Pedido 1er dia',
-          field: 'orderFirstDay',
-          type: 'boolean',
-        },
+        // {
+        //   label: 'Pedido 1er dia',
+        //   field: 'orderFirstDay',
+        //   type: 'boolean',
+        // },
         {
           label: 'RND',
           field: 'rndArrive',

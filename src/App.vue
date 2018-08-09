@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <input type="button" class="btn btn-info" value="Volver a Simular" onClick="window.location.href=window.location.href">
+    <input type="button" class="btn btn-warning fixed-top m-3" value="Resetear simulacion" onClick="window.location.href=window.location.href">
     <!-- <b-row>
       
       <b-col class="px-4" cols="6">

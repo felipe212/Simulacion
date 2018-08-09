@@ -11,6 +11,7 @@
           <b-col sm="3">
             <b-form-input id="input-small" v-model.number="configPolicyA.daysToSimulate" size="sm" type="number"></b-form-input>
             <div class="text-danger" v-if="!$v.configPolicyA.daysToSimulate.required">Debe ingresar un valor</div>
+            <div class="text-danger" v-if="!$v.configPolicyA.daysToSimulate.integer">Debe ingresar un entero</div>
             <div class="text-danger" v-if="!$v.configPolicyA.daysToSimulate.maxValue">Debe ingresar un valor menor o igual a 5000</div>
             <div class="text-danger" v-if="!$v.configPolicyA.daysToSimulate.minValue">Debe ingresar un valor mayor o igual a 1</div>
           </b-col>
@@ -20,6 +21,7 @@
           <b-col sm="3">
             <b-form-input id="input-small" v-model.number="week.stock" size="sm" type="number"></b-form-input>
             <div class="text-danger" v-if="!$v.week.stock.required">Debe ingresar un valor</div>
+            <div class="text-danger" v-if="!$v.week.stock.integer">Debe ingresar un entero</div>
             <div class="text-danger" v-if="!$v.week.stock.maxValue">Debe ingresar un valor menor o igual a 10000000000</div>
             <div class="text-danger" v-if="!$v.week.stock.minValue">Debe ingresar un valor mayor o igual a 0</div>
           </b-col>
@@ -29,6 +31,7 @@
           <b-col sm="3">
             <b-form-input id="input-small" v-model.number="configPolicyA.amountToOrder" size="sm" type="number"></b-form-input>
             <div class="text-danger" v-if="!$v.configPolicyA.amountToOrder.required">Debe ingresar un valor</div>
+            <div class="text-danger" v-if="!$v.configPolicyA.amountToOrder.integer">Debe ingresar un entero</div>
             <div class="text-danger" v-if="!$v.configPolicyA.amountToOrder.maxValue">Debe ingresar un valor menor o igual a 100</div>
             <div class="text-danger" v-if="!$v.configPolicyA.amountToOrder.minValue">Debe ingresar un valor mayor o igual a 1</div>
           </b-col>
@@ -38,6 +41,7 @@
           <b-col sm="3">
             <b-form-input id="input-small" v-model.number="configPolicyA.amountOrderFirstDay" size="sm" type="number"></b-form-input>
             <div class="text-danger" v-if="!$v.configPolicyA.amountOrderFirstDay.required">Debe ingresar un valor</div>
+            <div class="text-danger" v-if="!$v.configPolicyA.amountOrderFirstDay.integer">Debe ingresar un entero</div>
             <div class="text-danger" v-if="!$v.configPolicyA.amountOrderFirstDay.maxValue">Debe ingresar un valor menor o igual a 100</div>
             <div class="text-danger" v-if="!$v.configPolicyA.amountOrderFirstDay.minValue">Debe ingresar un valor mayor o igual a 1</div>
           </b-col>
@@ -47,6 +51,7 @@
           <b-col sm="3">
             <b-form-input id="input-small" size="sm" v-model.number="configPolicyA.daysToOrder" type="number"></b-form-input>
             <div class="text-danger" v-if="!$v.configPolicyA.daysToOrder.required">Debe ingresar un valor</div>
+            <div class="text-danger" v-if="!$v.configPolicyA.daysToOrder.integer">Debe ingresar un entero</div>
             <div class="text-danger" v-if="!$v.configPolicyA.daysToOrder.maxValue">Debe ingresar un valor menor o igual a 830 (2 años)</div>
             <div class="text-danger" v-if="!$v.configPolicyA.daysToOrder.minValue">Debe ingresar un valor mayor o igual a 1</div>
           </b-col>
@@ -81,7 +86,7 @@
         <b-button class="btn btn-success" @click="simulatePolicyA" :disabled="hasBeenSimulated">Simular A</b-button>
       </b-col>
     </b-row>
-    <vue-good-table styleClass="vgt-table condensed" theme="black-rhino" :columns="columns" :rows="rows"/>
+    <vue-good-table :pagination-options="{enabled: true, mode: 'pages'}" styleClass="vgt-table condensed" theme="black-rhino" :columns="columns" :rows="rows"/>
   </div>
 </template>
 
@@ -154,11 +159,11 @@ export default {
           field: 'order',
           type: 'boolean',
         },
-        {
-          label: 'Pedido 1er dia',
-          field: 'orderFirstDay',
-          type: 'boolean',
-        },
+        // {
+        //   label: 'Pedido 1er dia',
+        //   field: 'orderFirstDay',
+        //   type: 'boolean',
+        // },
         {
           label: 'RND',
           field: 'rndArrive',
